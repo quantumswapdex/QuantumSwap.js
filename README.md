@@ -55,10 +55,19 @@ This walkthrough uses **pre-deployed** WQ, V2 Factory, and Swap Router. Do **not
 
 6. **Swap ETH for token (optional)** — Wrap native currency: `wq.deposit({ value: amount })`. If there is no WQ–token pair yet, create it with `factory.createPair(wqAddress, tokenAddress)` and add liquidity via `router.addLiquidityETH(token, amountTokenDesired, amountTokenMin, amountETHMin, to, deadline, { value: ethAmount })`. Then call `router.swapExactETHForTokens(amountOutMin, [wqAddress, tokenAddress], to, deadline, { value: ethValue })` to swap native ETH for the token.
 
-A runnable script that performs all steps above is [**examples/walkthrough-dex-full-flow.js**](./examples/walkthrough-dex-full-flow.js). Run it with `QC_RPC_URL` set (and optionally `QC_CHAIN_ID`, or `QC_WALLET_JSON` + `QC_WALLET_PASSPHRASE` for your own wallet):
+Runnable scripts that perform all steps above:
+
+- **JavaScript:** [examples/walkthrough-dex-full-flow.js](./examples/walkthrough-dex-full-flow.js)
+- **TypeScript:** [examples/walkthrough-dex-full-flow.ts](./examples/walkthrough-dex-full-flow.ts)
+
+Run with `QC_RPC_URL` set (and optionally `QC_CHAIN_ID`, or `QC_WALLET_JSON` + `QC_WALLET_PASSPHRASE` for your own wallet):
 
 ```bash
+# JavaScript
 QC_RPC_URL=http://your-rpc:8545 node examples/walkthrough-dex-full-flow.js
+
+# TypeScript (requires typescript and ts-node: npm install -D typescript ts-node)
+QC_RPC_URL=http://your-rpc:8545 npx ts-node examples/walkthrough-dex-full-flow.ts
 ```
 
 The same flow is covered as an E2E test in [test/e2e/dex-full-flow.e2e.test.js](./test/e2e/dex-full-flow.e2e.test.js) (the test can optionally deploy WQ/Factory/Router when not using Test Release addresses).

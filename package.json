@@ -18,5 +18,8 @@
     "quantum-coin-js-sdk": "^1.0.28",
     "quantumcoin": "7.0.3"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "typescript": "^5.0.0"
+  }
 }
