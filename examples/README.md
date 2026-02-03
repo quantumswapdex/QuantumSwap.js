@@ -15,13 +15,9 @@ This installs `quantumswap` (from the parent via `file:..`) and `quantumcoin`. Y
 
 ## Running examples
 
-- **Walkthrough (pre-deployed contracts):**  
-  `npm run walkthrough` or `node walkthrough-dex-full-flow.js`  
-  Set `QC_RPC_URL` (and optionally `QC_CHAIN_ID`, `QC_WALLET_JSON`, `QC_WALLET_PASSPHRASE`).
-
-- **Full DEX flow (deploy WQ, Factory, Router, tokens, pair, liquidity, swap):**  
-  `npm run run-dex-flow` or `node run-dex-flow-custom.js`  
-  Uses `QC_RPC_URL` (default `http://127.0.0.1:8545`) and the default test wallet.
+- **Full DEX flow (pre-deployed WQ/Factory/Router, deploy tokens, pair, liquidity, swap):**  
+  `npm run run-dex-flow` or `node run-dex-flow-custom.js` (JS) / `npx ts-node run-dex-flow-custom.ts` (TS).  
+  Set `QC_RPC_URL` (default `http://127.0.0.1:8545`), optionally `QC_CHAIN_ID`, `QC_WALLET_JSON`, `QC_WALLET_PASSPHRASE`.
 
 - **Contract-specific examples:**  
   Deploy: `node deploy-WQ.js`, `node deploy-QuantumSwapV2Factory.js`, etc.  

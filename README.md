@@ -36,6 +36,16 @@ Transactional tests require:
 - `QC_RPC_URL` (required for transactional tests)
 - `QC_CHAIN_ID` (optional; defaults are used if omitted)
 
+## Examples
+
+- **JavaScript:** [examples/run-dex-flow-custom.js](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/examples/run-dex-flow-custom.js)
+- **TypeScript:** [examples/run-dex-flow-custom.ts](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/examples/run-dex-flow-custom.ts)
+
+      cd examples
+      npm install
+      $env:QC_RPC_URL="https://public.rpc.quantumcoiapi.com:8545" (export for Linux)
+      node run-dex-flow-custom.js
+
 ### Step by step walkthrough
 
 This walkthrough uses **pre-deployed** WQ, V2 Factory, and Swap Router. Do **not** deploy these contracts; use the Test Release (Dec 2025) addresses below.
@@ -67,8 +77,8 @@ This walkthrough uses **pre-deployed** WQ, V2 Factory, and Swap Router. Do **not
 
 Runnable scripts that perform all steps above:
 
-- **JavaScript:** [examples/walkthrough-dex-full-flow.js](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/examples/walkthrough-dex-full-flow.js)
-- **TypeScript:** [examples/walkthrough-dex-full-flow.ts](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/examples/walkthrough-dex-full-flow.ts)
+- **JavaScript:** [examples/run-dex-flow-custom.js](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/examples/run-dex-flow-custom.js)
+- **TypeScript:** [examples/run-dex-flow-custom.ts](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/examples/run-dex-flow-custom.ts)
 
 Run with `QC_RPC_URL` set (and optionally `QC_CHAIN_ID`, or `QC_WALLET_JSON` + `QC_WALLET_PASSPHRASE` for your own wallet):
 
@@ -76,15 +86,13 @@ Run with `QC_RPC_URL` set (and optionally `QC_CHAIN_ID`, or `QC_WALLET_JSON` + `
 # Use https://public.rpc.quantumcoinapi.com for mainnet
 
 # JavaScript
-QC_RPC_URL=http://your-rpc:8545 node examples/walkthrough-dex-full-flow.js
+QC_RPC_URL=http://your-rpc:8545 node examples/run-dex-flow-custom.js
 
 # TypeScript (requires typescript and ts-node: npm install -D typescript ts-node)
-QC_RPC_URL=http://your-rpc:8545 npx ts-node examples/walkthrough-dex-full-flow.ts
+QC_RPC_URL=http://your-rpc:8545 npx ts-node examples/run-dex-flow-custom.ts
 ```
 
 The same flow is covered as an E2E test in [test/e2e/dex-full-flow.e2e.test.js](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/test/e2e/dex-full-flow.e2e.test.js) (the test can optionally deploy WQ/Factory/Router when not using Test Release addresses).
-
-## Examples
 
 Examples are generated per contract (e.g. [examples/deploy-&lt;Contract&gt;.js](https://github.com/quantumswapdex/QuantumSwap.js/tree/main/examples)).
 
