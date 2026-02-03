@@ -4,11 +4,21 @@ QuantumSwap.js SDK for DEX functionality in QuantumCoin blockchain
 
 > **Note:** This is an experimental SDK. Use at your own risk.
 
+## Interacting with QuantumCoin blockchain
+
+For general programmatic interaction with the QuantumCoin blockchain (wallets, providers, contracts, encoding, etc.), use **quantumcoin.js**:
+
+- **npm:** [quantumcoin](https://www.npmjs.com/package/quantumcoin)
+- **Git:** [quantumcoin.js repository](https://github.com/quantumcoinproject/quantumcoin.js) (see the npm package page for the canonical repo link)
+
+QuantumSwap.js depends on `quantumcoin` and uses it for `Initialize`, `JsonRpcProvider`, `Wallet`, `Contract`, and related utilities. Use quantumcoin.js for all non–QuantumSwap-specific blockchain interaction.
+
+
 ## What’s in this package
 
-- JavaScript contract wrappers and factories in `src/` (TypeScript types via `.d.ts`)
-- Transactional tests in `test/e2e/`
-- Example scripts in `examples/`
+- JavaScript contract wrappers and factories in [src/](https://github.com/quantumswapdex/QuantumSwap.js/tree/main/src) (TypeScript types via `.d.ts`)
+- Transactional tests in [test/e2e/](https://github.com/quantumswapdex/QuantumSwap.js/tree/main/test/e2e)
+- Example scripts in [examples/](https://github.com/quantumswapdex/QuantumSwap.js/tree/main/examples)
 
 ## Install
 
@@ -25,6 +35,16 @@ QuantumSwap.js SDK for DEX functionality in QuantumCoin blockchain
 Transactional tests require:
 - `QC_RPC_URL` (required for transactional tests)
 - `QC_CHAIN_ID` (optional; defaults are used if omitted)
+
+## Examples
+
+- **JavaScript:** [examples/run-dex-flow-custom.js](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/examples/run-dex-flow-custom.js)
+- **TypeScript:** [examples/run-dex-flow-custom.ts](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/examples/run-dex-flow-custom.ts)
+
+      cd examples
+      npm install
+      $env:QC_RPC_URL="https://public.rpc.quantumcoiapi.com:8545" (export for Linux)
+      node run-dex-flow-custom.js
 
 ### Step by step walkthrough
 
@@ -57,24 +77,24 @@ This walkthrough uses **pre-deployed** WQ, V2 Factory, and Swap Router. Do **not
 
 Runnable scripts that perform all steps above:
 
-- **JavaScript:** [examples/walkthrough-dex-full-flow.js](./examples/walkthrough-dex-full-flow.js)
-- **TypeScript:** [examples/walkthrough-dex-full-flow.ts](./examples/walkthrough-dex-full-flow.ts)
+- **JavaScript:** [examples/run-dex-flow-custom.js](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/examples/run-dex-flow-custom.js)
+- **TypeScript:** [examples/run-dex-flow-custom.ts](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/examples/run-dex-flow-custom.ts)
 
 Run with `QC_RPC_URL` set (and optionally `QC_CHAIN_ID`, or `QC_WALLET_JSON` + `QC_WALLET_PASSPHRASE` for your own wallet):
 
 ```bash
+# Use https://public.rpc.quantumcoinapi.com for mainnet
+
 # JavaScript
-QC_RPC_URL=http://your-rpc:8545 node examples/walkthrough-dex-full-flow.js
+QC_RPC_URL=http://your-rpc:8545 node examples/run-dex-flow-custom.js
 
 # TypeScript (requires typescript and ts-node: npm install -D typescript ts-node)
-QC_RPC_URL=http://your-rpc:8545 npx ts-node examples/walkthrough-dex-full-flow.ts
+QC_RPC_URL=http://your-rpc:8545 npx ts-node examples/run-dex-flow-custom.ts
 ```
 
-The same flow is covered as an E2E test in [test/e2e/dex-full-flow.e2e.test.js](./test/e2e/dex-full-flow.e2e.test.js) (the test can optionally deploy WQ/Factory/Router when not using Test Release addresses).
+The same flow is covered as an E2E test in [test/e2e/dex-full-flow.e2e.test.js](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/test/e2e/dex-full-flow.e2e.test.js) (the test can optionally deploy WQ/Factory/Router when not using Test Release addresses).
 
-## Examples
-
-Examples are generated per contract (e.g. `examples/deploy-<Contract>.js`).
+Examples are generated per contract (e.g. [examples/deploy-&lt;Contract&gt;.js](https://github.com/quantumswapdex/QuantumSwap.js/tree/main/examples)).
 
 ## Contracts
 
@@ -89,15 +109,15 @@ Examples are generated per contract (e.g. `examples/deploy-<Contract>.js`).
 - **Exports**: `IERC20`, `IERC20__factory`
 - **Constructor**: `constructor()`
 ### Files
-- [`src/IERC20.js`](./src/IERC20.js)
-- [`src/IERC20__factory.js`](./src/IERC20__factory.js)
+- [`src/IERC20.js`](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/src/IERC20.js)
+- [`src/IERC20__factory.js`](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/src/IERC20__factory.js)
 ### Examples
-- [deploy](./examples/deploy-IERC20.js)
-- [read operations](./examples/read-operations-IERC20.js)
-- [write operations](./examples/write-operations-IERC20.js)
-- [events](./examples/events-IERC20.js)
+- [deploy](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/examples/deploy-IERC20.js)
+- [read operations](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/examples/read-operations-IERC20.js)
+- [write operations](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/examples/write-operations-IERC20.js)
+- [events](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/examples/events-IERC20.js)
 ### Tests
-- [transactional test](./test/e2e/IERC20.e2e.test.js)
+- [transactional test](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/test/e2e/IERC20.e2e.test.js)
 ### Functions
 - `allowance(address owner, address spender) view returns (uint256)`
 - `approve(address spender, uint256 value) returns (bool)`
@@ -117,15 +137,15 @@ Examples are generated per contract (e.g. `examples/deploy-<Contract>.js`).
 - **Exports**: `QuantumSwapV2ERC20`, `QuantumSwapV2ERC20__factory`
 - **Constructor**: `constructor()`
 ### Files
-- [`src/QuantumSwapV2ERC20.js`](./src/QuantumSwapV2ERC20.js)
-- [`src/QuantumSwapV2ERC20__factory.js`](./src/QuantumSwapV2ERC20__factory.js)
+- [`src/QuantumSwapV2ERC20.js`](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/src/QuantumSwapV2ERC20.js)
+- [`src/QuantumSwapV2ERC20__factory.js`](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/src/QuantumSwapV2ERC20__factory.js)
 ### Examples
-- [deploy](./examples/deploy-QuantumSwapV2ERC20.js)
-- [read operations](./examples/read-operations-QuantumSwapV2ERC20.js)
-- [write operations](./examples/write-operations-QuantumSwapV2ERC20.js)
-- [events](./examples/events-QuantumSwapV2ERC20.js)
+- [deploy](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/examples/deploy-QuantumSwapV2ERC20.js)
+- [read operations](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/examples/read-operations-QuantumSwapV2ERC20.js)
+- [write operations](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/examples/write-operations-QuantumSwapV2ERC20.js)
+- [events](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/examples/events-QuantumSwapV2ERC20.js)
 ### Tests
-- [transactional test](./test/e2e/QuantumSwapV2ERC20.e2e.test.js)
+- [transactional test](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/test/e2e/QuantumSwapV2ERC20.e2e.test.js)
 ### Functions
 - `allowance(address, address) view returns (uint256)`
 - `approve(address spender, uint256 value) returns (bool)`
@@ -145,15 +165,15 @@ Examples are generated per contract (e.g. `examples/deploy-<Contract>.js`).
 - **Exports**: `QuantumSwapV2Factory`, `QuantumSwapV2Factory__factory`
 - **Constructor**: `constructor(address _feeToSetter)`
 ### Files
-- [`src/QuantumSwapV2Factory.js`](./src/QuantumSwapV2Factory.js)
-- [`src/QuantumSwapV2Factory__factory.js`](./src/QuantumSwapV2Factory__factory.js)
+- [`src/QuantumSwapV2Factory.js`](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/src/QuantumSwapV2Factory.js)
+- [`src/QuantumSwapV2Factory__factory.js`](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/src/QuantumSwapV2Factory__factory.js)
 ### Examples
-- [deploy](./examples/deploy-QuantumSwapV2Factory.js)
-- [read operations](./examples/read-operations-QuantumSwapV2Factory.js)
-- [write operations](./examples/write-operations-QuantumSwapV2Factory.js)
-- [events](./examples/events-QuantumSwapV2Factory.js)
+- [deploy](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/examples/deploy-QuantumSwapV2Factory.js)
+- [read operations](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/examples/read-operations-QuantumSwapV2Factory.js)
+- [write operations](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/examples/write-operations-QuantumSwapV2Factory.js)
+- [events](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/examples/events-QuantumSwapV2Factory.js)
 ### Tests
-- [transactional test](./test/e2e/QuantumSwapV2Factory.e2e.test.js)
+- [transactional test](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/test/e2e/QuantumSwapV2Factory.e2e.test.js)
 ### Functions
 - `allPairs(uint256) view returns (address)`
 - `allPairsLength() view returns (uint256)`
@@ -172,15 +192,15 @@ Examples are generated per contract (e.g. `examples/deploy-<Contract>.js`).
 - **Exports**: `QuantumSwapV2Pair`, `QuantumSwapV2Pair__factory`
 - **Constructor**: `constructor()`
 ### Files
-- [`src/QuantumSwapV2Pair.js`](./src/QuantumSwapV2Pair.js)
-- [`src/QuantumSwapV2Pair__factory.js`](./src/QuantumSwapV2Pair__factory.js)
+- [`src/QuantumSwapV2Pair.js`](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/src/QuantumSwapV2Pair.js)
+- [`src/QuantumSwapV2Pair__factory.js`](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/src/QuantumSwapV2Pair__factory.js)
 ### Examples
-- [deploy](./examples/deploy-QuantumSwapV2Pair.js)
-- [read operations](./examples/read-operations-QuantumSwapV2Pair.js)
-- [write operations](./examples/write-operations-QuantumSwapV2Pair.js)
-- [events](./examples/events-QuantumSwapV2Pair.js)
+- [deploy](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/examples/deploy-QuantumSwapV2Pair.js)
+- [read operations](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/examples/read-operations-QuantumSwapV2Pair.js)
+- [write operations](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/examples/write-operations-QuantumSwapV2Pair.js)
+- [events](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/examples/events-QuantumSwapV2Pair.js)
 ### Tests
-- [transactional test](./test/e2e/QuantumSwapV2Pair.e2e.test.js)
+- [transactional test](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/test/e2e/QuantumSwapV2Pair.e2e.test.js)
 ### Functions
 - `allowance(address, address) view returns (uint256)`
 - `approve(address spender, uint256 value) returns (bool)`
@@ -218,15 +238,15 @@ Examples are generated per contract (e.g. `examples/deploy-<Contract>.js`).
 - **Exports**: `QuantumSwapV2Router02`, `QuantumSwapV2Router02__factory`
 - **Constructor**: `constructor(address _factory, address _WETH)`
 ### Files
-- [`src/QuantumSwapV2Router02.js`](./src/QuantumSwapV2Router02.js)
-- [`src/QuantumSwapV2Router02__factory.js`](./src/QuantumSwapV2Router02__factory.js)
+- [`src/QuantumSwapV2Router02.js`](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/src/QuantumSwapV2Router02.js)
+- [`src/QuantumSwapV2Router02__factory.js`](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/src/QuantumSwapV2Router02__factory.js)
 ### Examples
-- [deploy](./examples/deploy-QuantumSwapV2Router02.js)
-- [read operations](./examples/read-operations-QuantumSwapV2Router02.js)
-- [write operations](./examples/write-operations-QuantumSwapV2Router02.js)
-- [events](./examples/events-QuantumSwapV2Router02.js)
+- [deploy](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/examples/deploy-QuantumSwapV2Router02.js)
+- [read operations](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/examples/read-operations-QuantumSwapV2Router02.js)
+- [write operations](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/examples/write-operations-QuantumSwapV2Router02.js)
+- [events](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/examples/events-QuantumSwapV2Router02.js)
 ### Tests
-- [transactional test](./test/e2e/QuantumSwapV2Router02.e2e.test.js)
+- [transactional test](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/test/e2e/QuantumSwapV2Router02.e2e.test.js)
 ### Functions
 - `addLiquidity(address tokenA, address tokenB, uint256 amountADesired, uint256 amountBDesired, uint256 amountAMin, uint256 amountBMin, address to, uint256 deadline) returns (uint256, uint256, uint256)`
 - `addLiquidityETH(address token, uint256 amountTokenDesired, uint256 amountTokenMin, uint256 amountETHMin, address to, uint256 deadline) payable returns (uint256, uint256, uint256)`
@@ -257,15 +277,15 @@ Examples are generated per contract (e.g. `examples/deploy-<Contract>.js`).
 - **Exports**: `WQ`, `WQ__factory`
 - **Constructor**: `constructor()`
 ### Files
-- [`src/WQ.js`](./src/WQ.js)
-- [`src/WQ__factory.js`](./src/WQ__factory.js)
+- [`src/WQ.js`](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/src/WQ.js)
+- [`src/WQ__factory.js`](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/src/WQ__factory.js)
 ### Examples
-- [deploy](./examples/deploy-WQ.js)
-- [read operations](./examples/read-operations-WQ.js)
-- [write operations](./examples/write-operations-WQ.js)
-- [events](./examples/events-WQ.js)
+- [deploy](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/examples/deploy-WQ.js)
+- [read operations](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/examples/read-operations-WQ.js)
+- [write operations](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/examples/write-operations-WQ.js)
+- [events](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/examples/events-WQ.js)
 ### Tests
-- [transactional test](./test/e2e/WQ.e2e.test.js)
+- [transactional test](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/test/e2e/WQ.e2e.test.js)
 ### Functions
 - `allowance(address, address) view returns (uint256)`
 - `approve(address guy, uint256 wad) returns (bool)`

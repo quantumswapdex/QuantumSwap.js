@@ -1,7 +1,10 @@
-const { Initialize } = require("quantumcoin/config");
-const { JsonRpcProvider } = require("quantumcoin");
+const path = require("node:path");
+const parentQcPath = path.join(__dirname, "..", "node_modules", "quantumcoin");
+const { Initialize } = require(path.join(parentQcPath, "config"));
+const { JsonRpcProvider } = require(parentQcPath);
 const { createTestWallet } = require("./_test-wallet");
-const { QuantumSwapV2Router02 } = require("..");
+const parentQswapPath = path.join(__dirname, "..");
+const { QuantumSwapV2Router02 } = require(parentQswapPath);
 
 async function main() {
   const rpcUrl = process.env.QC_RPC_URL;

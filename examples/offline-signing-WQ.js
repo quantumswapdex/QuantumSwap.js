@@ -1,7 +1,10 @@
-const { Initialize } = require("quantumcoin/config");
-const { JsonRpcProvider, Wallet, getCreateAddress } = require("quantumcoin");
+const path = require("node:path");
+const parentQcPath = path.join(__dirname, "..", "node_modules", "quantumcoin");
+const { Initialize } = require(path.join(parentQcPath, "config"));
+const { JsonRpcProvider, Wallet, getCreateAddress } = require(parentQcPath);
 const { TEST_WALLET_ENCRYPTED_JSON, TEST_WALLET_PASSPHRASE } = require("./_test-wallet");
-const { WQ__factory, WQ } = require("..");
+const parentQswapPath = path.join(__dirname, "..");
+const { WQ__factory, WQ } = require(parentQswapPath);
 
 async function main() {
   const rpcUrl = process.env.QC_RPC_URL;

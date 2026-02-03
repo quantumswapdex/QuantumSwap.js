@@ -1,0 +1,14 @@
+{
+  "name": "quantumswap-examples",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Example scripts for QuantumSwap SDK (DEX on QuantumCoin)",
+  "scripts": {
+    "run-dex-flow": "node run-dex-flow-custom.js",
+    "run-dex-flow:ts": "npx ts-node run-dex-flow-custom.ts"
+  },
+  "dependencies": {
+    "quantumswap": "file:..",
+    "quantumcoin": "7.0.3"
+  }
+}
