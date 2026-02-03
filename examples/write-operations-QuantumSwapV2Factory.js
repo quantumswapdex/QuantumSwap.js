@@ -1,7 +1,7 @@
 const { Initialize } = require("quantumcoin/config");
 const { JsonRpcProvider } = require("quantumcoin");
 const { createTestWallet } = require("./_test-wallet");
-const { QuantumSwapV2Factory } = require("..");
+const { QuantumSwapV2Factory } = require("quantumswap");
 
 async function main() {
   const rpcUrl = process.env.QC_RPC_URL;

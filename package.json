@@ -1,6 +1,6 @@
 {
   "name": "quantumswap",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "QuantumSwap.js SDK for DEX functionality in QuantumCoin blockchain",
   "author": "QuantumSwap Community",
   "license": "MIT",
@@ -13,23 +13,23 @@
     "test:e2e": "node --test --test-concurrency=1 \"test/e2e/**/*.test.js\""
   },
   "dependencies": {
-    "quantum-coin-pqc-js-sdk": "^1.0.5",
-    "seed-words": "^1.0.2",
     "quantum-coin-js-sdk": "^1.0.28",
-    "quantumcoin": "7.0.3"
+    "quantum-coin-pqc-js-sdk": "^1.0.5",
+    "quantumcoin": "^7.0.3",
+    "seed-words": "^1.0.2"
   },
   "devDependencies": {
     "ts-node": "^10.9.2",
     "typescript": "^5.0.0"
   },
   "bugs": {
-  "url": "https://github.com/quantumswapdex/QuantumSwap.js/issues"
-},
-"homepage": "https://github.com/quantumswapdex/QuantumSwap.js#readme",
+    "url": "https://github.com/quantumswapdex/QuantumSwap.js/issues"
+  },
+  "homepage": "https://github.com/quantumswapdex/QuantumSwap.js#readme",
   "keywords": [
     "quantumswap",
     "quantum coin",
     "quantumcoin",
     "dex"
-  ]  
+  ]
 }

@@ -32,7 +32,7 @@ const {
   QuantumSwapV2Factory,
   QuantumSwapV2Router02,
   QuantumSwapV2Pair,
-} = require("..");
+} = require("quantumswap");
 
 // Test Release (Dec 2025) — do not deploy these
 const WQ_CONTRACT_ADDRESS = "0x0E49c26cd1ca19bF8ddA2C8985B96783288458754757F4C9E00a5439A7291628";

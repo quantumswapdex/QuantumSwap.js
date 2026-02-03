@@ -1,6 +1,6 @@
 const { Initialize } = require("quantumcoin/config");
 const { JsonRpcProvider } = require("quantumcoin");
-const { IERC20 } = require("..");
+const { IERC20 } = require("quantumswap");
 
 async function main() {
   const rpcUrl = process.env.QC_RPC_URL;
