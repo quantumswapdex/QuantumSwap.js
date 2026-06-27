@@ -9,6 +9,6 @@
   },
   "dependencies": {
     "quantumswap": "file:..",
-    "quantumcoin": "7.0.13"
+    "quantumcoin": "7.0.15"
   }
 }
