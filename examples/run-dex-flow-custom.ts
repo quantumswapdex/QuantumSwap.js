@@ -30,7 +30,7 @@ const CHAIN_ID = process.env.QC_CHAIN_ID ? Number(process.env.QC_CHAIN_ID) : 123
 const DEADLINE_OFFSET = process.env.QC_DEADLINE_OFFSET ? Number(process.env.QC_DEADLINE_OFFSET) : 3600;
 const DEPLOY_GAS_FALLBACK = 6_000_000n;
 const TX_GAS_FALLBACK = 400_000n;
-const GAS_BUFFER_PERCENT = 110n;
+const GAS_BUFFER_PERCENT = 140n; // 40% buffer over estimate
 
 const WQ_ADDRESS = "0x0E49c26cd1ca19bF8ddA2C8985B96783288458754757F4C9E00a5439A7291628";
 const FACTORY_ADDRESS = "0xbbF45a1B60044669793B444eD01Eb33e03Bb8cf3c5b6ae7887B218D05C5Cbf1d";
@@ -49,9 +49,15 @@ try {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     artifact = require("quantumcoin/examples/sdk-generator-erc20.inline.json");
   } catch {
-    const qcDir = path.dirname(require.resolve("quantumcoin"));
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    artifact = require(path.join(qcDir, "examples", "sdk-generator-erc20.inline.json"));
+    try {
+      const qcDir = path.dirname(require.resolve("quantumcoin"));
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      artifact = require(path.join(qcDir, "examples", "sdk-generator-erc20.inline.json"));
+    } catch {
+      // quantumcoin@8+ no longer ships examples/; use the repo's compiled fixture.
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      artifact = require(path.join(__dirname, "..", "test", "fixtures", "simple-erc20.inline.json"));
+    }
   }
   const simple = Array.isArray(artifact) ? artifact[0] : artifact;
   SIMPLE_ERC20_ABI = simple.abi;
@@ -118,13 +124,16 @@ async function main(): Promise<void> {
   }
 
   await Initialize(null);
-  // quantumswap (file:..) uses repo root's quantumcoin; initialize that instance too
+  // quantumswap (file:..) may resolve its own quantumcoin instance (separate from
+  // this example's). Initialize the exact instance the SDK loads, resolved from
+  // the quantumswap package location.
   try {
-    const qswapMain = require.resolve("quantumswap");
-    const repoRoot = path.join(path.dirname(qswapMain), "..");
-    const rootQcConfig = require(path.join(repoRoot, "node_modules", "quantumcoin", "config"));
-    if (rootQcConfig && typeof rootQcConfig.Initialize === "function") {
-      await rootQcConfig.Initialize(null);
+    const qswapDir = path.dirname(require.resolve("quantumswap"));
+    const sdkQcConfigPath = require.resolve("quantumcoin/config", { paths: [qswapDir] });
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const sdkQcConfig = require(sdkQcConfigPath);
+    if (sdkQcConfig && typeof sdkQcConfig.Initialize === "function") {
+      await sdkQcConfig.Initialize(null);
     }
   } catch {
     // ignore
@@ -155,10 +164,33 @@ async function main(): Promise<void> {
   let factoryContract: any;
   let routerContract: any;
 
-  wq = WQ.connect(wqAddressNorm, wallet);
-  factoryContract = QuantumSwapV2Factory.connect(factoryAddressNorm, wallet);
-  routerContract = QuantumSwapV2Router02.connect(routerAddress, wallet);
-  console.log("1–3) Using pre-deployed WQ, Factory, Router");
+  // Use the pre-deployed contracts when they exist on the target node; otherwise
+  // deploy fresh WQ/Factory/Router (e.g. on a private devnet).
+  const preWqCode = await provider.getCode(wqAddressNorm, "latest").catch(() => "0x");
+  const usePreDeployed = Boolean(preWqCode && preWqCode !== "0x");
+  if (usePreDeployed) {
+    wq = WQ.connect(wqAddressNorm, wallet);
+    factoryContract = QuantumSwapV2Factory.connect(factoryAddressNorm, wallet);
+    routerContract = QuantumSwapV2Router02.connect(routerAddress, wallet);
+    console.log("1–3) Using pre-deployed WQ, Factory, Router");
+  } else {
+    console.log("1–3) Pre-deployed contracts not found on this node; deploying WQ, Factory, Router...");
+    const wqDeployGas = await deployGasLimit(provider, walletAddr, () => new WQ__factory(wallet).getDeployTransaction(), DEPLOY_GAS_FALLBACK, 6_000_000n);
+    wq = await new WQ__factory(wallet).deploy({ gasLimit: wqDeployGas });
+    await wq.deployTransaction().wait(1, 600_000);
+    wqAddressNorm = getAddress(wq.target as string);
+
+    const factoryDeployGas = await deployGasLimit(provider, walletAddr, () => new QuantumSwapV2Factory__factory(wallet).getDeployTransaction(walletAddr), DEPLOY_GAS_FALLBACK, 6_000_000n);
+    factoryContract = await new QuantumSwapV2Factory__factory(wallet).deploy(walletAddr, { gasLimit: factoryDeployGas });
+    await factoryContract.deployTransaction().wait(1, 600_000);
+    factoryAddressNorm = getAddress(factoryContract.target as string);
+
+    const routerDeployGas = await deployGasLimit(provider, walletAddr, () => new QuantumSwapV2Router02__factory(wallet).getDeployTransaction(factoryAddressNorm, wqAddressNorm), DEPLOY_GAS_FALLBACK, 6_000_000n);
+    routerContract = await new QuantumSwapV2Router02__factory(wallet).deploy(factoryAddressNorm, wqAddressNorm, { gasLimit: routerDeployGas });
+    await routerContract.deployTransaction().wait(1, 600_000);
+    routerAddress = getAddress(routerContract.target as string);
+    console.log("1–3) Deployed WQ, Factory, Router");
+  }
   console.log("   WQ:", wqAddressNorm);
   console.log("   Factory:", factoryAddressNorm);
   console.log("   Router:", routerAddress);

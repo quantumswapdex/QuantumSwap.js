@@ -1,4 +1,7 @@
 node_modules
 /dist
+test/browser/dist
+test-results
+playwright-report
 *.log
 .cursor

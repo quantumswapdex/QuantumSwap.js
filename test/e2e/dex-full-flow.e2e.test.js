@@ -41,9 +41,16 @@ const {
 let SIMPLE_ERC20_ABI;
 let SIMPLE_ERC20_BYTECODE;
 try {
-  const qcPkg = require.resolve("quantumcoin/package.json");
-  const qcRoot = path.dirname(qcPkg);
-  const artifact = require(path.join(qcRoot, "examples", "sdk-generator-erc20.inline.json"));
+  let artifact;
+  try {
+    // Prefer the artifact shipped by older quantumcoin releases.
+    const qcPkg = require.resolve("quantumcoin/package.json");
+    const qcRoot = path.dirname(qcPkg);
+    artifact = require(path.join(qcRoot, "examples", "sdk-generator-erc20.inline.json"));
+  } catch {
+    // quantumcoin@8+ no longer ships examples/; use the locally compiled fixture.
+    artifact = require(path.join(__dirname, "..", "fixtures", "simple-erc20.inline.json"));
+  }
   const simple = Array.isArray(artifact) ? artifact[0] : artifact;
   SIMPLE_ERC20_ABI = simple.abi;
   SIMPLE_ERC20_BYTECODE = simple.bin;
@@ -58,10 +65,15 @@ const TEST_WALLET_PASSPHRASE = "QuantumCoinExample123!";
 
 const DEPLOY_GAS_FALLBACK = 6_000_000n;
 const TX_GAS_FALLBACK = 400_000n;
-const GAS_BUFFER_PERCENT = 110n; // 10% buffer over estimate
+const GAS_BUFFER_PERCENT = 140n; // 40% buffer over estimate (node's eth_estimateGas under-reports for nested/payable swaps)
 // Use chain block timestamp (UTC) + offset for deadline so it matches what the router checks (no clock skew).
 // Router requires block.timestamp <= deadline.
 const DEADLINE_OFFSET = process.env.QC_DEADLINE_OFFSET ? Number(process.env.QC_DEADLINE_OFFSET) : 3600;
+// Slow nodes can take 30-70s per transaction; allow a generous, configurable cap.
+const TEST_TIMEOUT = process.env.QC_TEST_TIMEOUT ? Number(process.env.QC_TEST_TIMEOUT) : 3_600_000;
+// Retry ceiling for payable/nested-call swaps when the node's eth_estimateGas
+// under-reports (out-of-gas despite the +10% buffer).
+const SWAP_ETH_GAS_CEILING = process.env.QC_SWAP_GAS_CEILING ? BigInt(process.env.QC_SWAP_GAS_CEILING) : 3_000_000n;
 
 /** Returns deadline as UTC Unix timestamp: current chain block timestamp + DEADLINE_OFFSET. */
 async function deadline(provider) {
@@ -84,14 +96,59 @@ function reportDexFlow(contractAddresses, txHashes) {
   console.log("================================================\n");
 }
 
-/** Estimate gas via provider.estimateGas (quantumcoin.js SDK), add buffer, fallback on error. */
-async function estimateGasLimit(provider, txRequest, fallback) {
+/** Normalize an error thrown by eth_call/estimateGas into a short reason string. */
+function toReason(e) {
+  if (!e) return "unknown";
+  if (e.reason) return e.reason;
+  if (e.shortMessage) return e.shortMessage;
+  if (e.info && e.info.error && e.info.error.message) return e.info.error.message;
+  if (typeof e.data === "string" && e.data.length > 2) return `revert data ${e.data}`;
+  return e.message || String(e);
+}
+
+/**
+ * Native eth_call probe at an optional explicit gas limit. Returns whether the
+ * call succeeds and, if not, the decoded revert reason. Probing at the tx's own
+ * gas limit vs. a high gas limit distinguishes an out-of-gas failure (reverts at
+ * low gas, succeeds at high gas) from a genuine logic revert (fails at both).
+ */
+async function probeCall(provider, txRequest, gasLimit) {
+  const req = gasLimit ? { ...txRequest, gasLimit } : { ...txRequest };
+  try {
+    await provider.call(req);
+    return { ok: true, reason: null };
+  } catch (e) {
+    return { ok: false, reason: toReason(e) };
+  }
+}
+
+/**
+ * Extract a human-readable revert reason using a native eth_call (provider.call).
+ * Returns null when the call does not revert.
+ */
+async function getRevertReason(provider, txRequest) {
+  const { reason } = await probeCall(provider, txRequest);
+  return reason;
+}
+
+/**
+ * Native RPC gas estimate (eth_estimateGas) + 10% buffer.
+ * On estimate failure, surfaces the underlying revert reason (via eth_call) and
+ * falls back to the provided limit so the transaction still broadcasts.
+ */
+async function estimateGasLimit(provider, txRequest, fallback, label) {
   try {
     const est = await provider.estimateGas(txRequest);
     const estBn = typeof est === "bigint" ? est : BigInt(est);
     const withBuffer = (estBn * GAS_BUFFER_PERCENT) / 100n;
     return withBuffer > 0n ? withBuffer : fallback;
-  } catch {
+  } catch (e) {
+    const reason = await getRevertReason(provider, txRequest);
+    const errMsg = e && (e.shortMessage || e.message) ? e.shortMessage || e.message : String(e);
+    console.log(
+      `[gas] eth_estimateGas failed${label ? ` for ${label}` : ""}: ${errMsg}` +
+        `${reason ? ` | revert reason: ${reason}` : ""} (using fallback ${fallback})`,
+    );
     return fallback;
   }
 }
@@ -493,21 +550,53 @@ describe("QuantumSwap V2 DEX full flow", () => {
         swapEthDeadline,
         { value: ethSwapValue },
       );
-      const swapEthGasLimit = await estimateGasLimit(provider, { from: walletAddr, ...swapEthTxReq }, TX_GAS_FALLBACK);
+      const swapEthGasLimit = await estimateGasLimit(provider, { from: walletAddr, ...swapEthTxReq }, TX_GAS_FALLBACK, "swapExactETHForTokens");
       const tokenABalanceBeforeEthSwapRaw = await tokenA.balanceOf(walletAddr);
       const tokenABalanceBeforeEthSwap = typeof tokenABalanceBeforeEthSwapRaw === "bigint" ? tokenABalanceBeforeEthSwapRaw : BigInt(String(tokenABalanceBeforeEthSwapRaw));
-      const swapEthTx = await routerContract.swapExactETHForTokens(
-        0n,
-        pathEthToToken,
-        walletAddr,
-        swapEthDeadline,
-        { value: ethSwapValue, gasLimit: swapEthGasLimit },
-      );
-      console.log("[10e] swapExactETHForTokens tx id:", swapEthTx.hash);
-      txHashes.push(swapEthTx.hash);
-      const swapEthReceipt = await swapEthTx.wait(1, 600_000);
-      addReceiptGas(swapEthReceipt);
-      assert.ok(swapEthReceipt && swapEthReceipt.status === 1, "swapExactETHForTokens must succeed");
+      const sendSwapEth = async (gasLimit) => {
+        const tx = await routerContract.swapExactETHForTokens(
+          0n,
+          pathEthToToken,
+          walletAddr,
+          swapEthDeadline,
+          { value: ethSwapValue, gasLimit },
+        );
+        console.log(`[10e] swapExactETHForTokens tx id: ${tx.hash} (gasLimit ${gasLimit})`);
+        txHashes.push(tx.hash);
+        const receipt = await tx.wait(1, 600_000);
+        addReceiptGas(receipt);
+        return receipt;
+      };
+      let swapEthReceipt = await sendSwapEth(swapEthGasLimit);
+      if (!swapEthReceipt || swapEthReceipt.status !== 1) {
+        // Diagnose: replay eth_call at the tx's gas vs. a high gas vs. node default.
+        const baseReq = { from: walletAddr, ...swapEthTxReq };
+        const atTxGas = await probeCall(provider, baseReq, swapEthGasLimit);
+        const atHighGas = await probeCall(provider, baseReq, SWAP_ETH_GAS_CEILING);
+        const atDefault = await probeCall(provider, baseReq);
+        const used = swapEthReceipt && swapEthReceipt.gasUsed ? BigInt(swapEthReceipt.gasUsed) : 0n;
+        const nearLimit = used > 0n && swapEthGasLimit > 0n && used * 100n >= swapEthGasLimit * 97n;
+        const looksOutOfGas = nearLimit && !atTxGas.ok && atHighGas.ok;
+        console.log(
+          `[10e] swapExactETHForTokens FAILED status=${swapEthReceipt && swapEthReceipt.status} gasUsed=${used} gasLimit=${swapEthGasLimit}`,
+        );
+        console.log(
+          `[10e] diagnosis: nearGasLimit=${nearLimit} looksOutOfGas=${looksOutOfGas} | ` +
+            `eth_call@txGas ok=${atTxGas.ok} reason=${atTxGas.reason} | ` +
+            `eth_call@${SWAP_ETH_GAS_CEILING} ok=${atHighGas.ok} reason=${atHighGas.reason} | ` +
+            `eth_call@nodeDefault ok=${atDefault.ok} reason=${atDefault.reason}`,
+        );
+        if (looksOutOfGas || (!atTxGas.ok && atHighGas.ok)) {
+          console.log(
+            `[10e] eth_estimateGas under-reported for this payable/nested-call swap; retrying at ${SWAP_ETH_GAS_CEILING} gas`,
+          );
+          swapEthReceipt = await sendSwapEth(SWAP_ETH_GAS_CEILING);
+        }
+      }
+      if (!swapEthReceipt || swapEthReceipt.status !== 1) {
+        const reason = await getRevertReason(provider, { from: walletAddr, ...swapEthTxReq });
+        assert.ok(false, `swapExactETHForTokens must succeed (status=${swapEthReceipt && swapEthReceipt.status}, revert reason: ${reason})`);
+      }
       const tokenABalanceAfterEthSwapRaw = await tokenA.balanceOf(walletAddr);
       const tokenABalanceAfterEthSwap = typeof tokenABalanceAfterEthSwapRaw === "bigint" ? tokenABalanceAfterEthSwapRaw : BigInt(String(tokenABalanceAfterEthSwapRaw));
       assert.ok(tokenABalanceAfterEthSwap > tokenABalanceBeforeEthSwap, "wallet TokenA balance must increase after swapExactETHForTokens");
@@ -578,5 +667,5 @@ describe("QuantumSwap V2 DEX full flow", () => {
       }
       throw err;
     }
-  }, { timeout: 300_000 });
+  }, { timeout: TEST_TIMEOUT });
 });
