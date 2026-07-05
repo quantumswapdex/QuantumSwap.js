@@ -1,21 +1,46 @@
 {
   "name": "quantumswap",
-  "version": "0.0.9",
+  "version": "1.0.0",
   "description": "QuantumSwap.js SDK for DEX functionality in QuantumCoin blockchain",
   "author": "QuantumSwap Community",
   "license": "MIT",
   "main": "src/index.js",
   "types": "src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "browser": {
+    "node:net": false
+  },
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "src/**/*.js",
+    "src/**/*.d.ts",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "node -e \"console.log('JS package: no build step required')\"",
     "build-powershell": "node -e \"console.log('JS package: no build step required')\"",
-    "test": "node --test --test-concurrency=1 \"test/**/*.test.js\"",
-    "test:e2e": "node --test --test-concurrency=1 \"test/e2e/**/*.test.js\""
+    "test": "npm run test:unit && npm run test:e2e",
+    "test:unit": "node --test \"test/unit/**/*.test.js\"",
+    "test:unit:ts": "node --require ts-node/register --test \"test/unit/**/*.test.ts\"",
+    "test:e2e": "node --test --test-concurrency=1 \"test/e2e/**/*.test.js\"",
+    "test:browser:build": "node test/browser/build.js",
+    "test:browser": "npm run test:browser:build && npx playwright test"
   },
   "peerDependencies": {
-    "quantumcoin": "^7.0.15"
+    "quantumcoin": "^8.0.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.1",
+    "esbuild": "^0.28.1",
+    "quantumcoin": "^8.0.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.0.0"
   },

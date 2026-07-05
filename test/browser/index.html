@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>QuantumSwap browser tests</title>
+  </head>
+  <body>
+    <h1>QuantumSwap browser tests</h1>
+    <pre id="output">Running...</pre>
+
+    <!-- Bundled unit tests (registers suites and sets globalThis.__NODE_TEST__). -->
+    <script src="./tests.js"></script>
+
+    <script>
+      (async () => {
+        const output = document.getElementById("output");
+        try {
+          const runner = globalThis.__NODE_TEST__;
+          if (!runner || typeof runner.run !== "function") {
+            throw new Error("test runner not initialized (bundle failed to load)");
+          }
+          const results = await runner.run();
+          window.__TEST_RESULTS__ = results;
+          const lines = [
+            `passed:  ${results.passed}`,
+            `failed:  ${results.failed}`,
+            `skipped: ${results.skipped}`,
+          ];
+          if (results.errors.length) {
+            lines.push("", "errors:", ...results.errors.map((e) => `  - ${e}`));
+          }
+          output.textContent = lines.join("\n");
+        } catch (err) {
+          window.__TEST_RESULTS__ = {
+            passed: 0,
+            failed: 1,
+            skipped: 0,
+            errors: [String(err && err.message ? err.message : err)],
+          };
+          output.textContent = `harness error: ${err}`;
+        }
+      })();
+    </script>
+  </body>
+</html>
