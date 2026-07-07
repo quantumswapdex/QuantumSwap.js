@@ -1,6 +1,6 @@
 {
   "name": "quantumswap",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "QuantumSwap.js SDK for DEX functionality in QuantumCoin blockchain",
   "author": "QuantumSwap Community",
   "license": "MIT",
@@ -35,12 +35,12 @@
     "test:browser": "npm run test:browser:build && npx playwright test"
   },
   "peerDependencies": {
-    "quantumcoin": "^8.0.0"
+    "quantumcoin": "^8.0.1"
   },
   "devDependencies": {
     "@playwright/test": "^1.61.1",
     "esbuild": "^0.28.1",
-    "quantumcoin": "^8.0.0",
+    "quantumcoin": "^8.0.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.0.0"
   },
