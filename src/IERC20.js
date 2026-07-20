@@ -243,15 +243,21 @@ class IERC20 extends Contract {
     this.populateTransaction = {
       approve: async (spender, value, overrides) => {
         const data = this.interface.encodeFunctionData("approve", [spender, value]);
-        return { to: this.address, data, ...(overrides || {}) };
+        const safeOverrides = {};
+        for (const k of ["value", "gasLimit", "gasPrice", "maxFeePerGas", "maxPriorityFeePerGas", "nonce", "chainId", "remarks", "signingContext"]) { if (overrides && overrides[k] !== undefined) safeOverrides[k] = overrides[k]; }
+        return { ...safeOverrides, to: this.address, data };
       },
       transfer: async (to, value, overrides) => {
         const data = this.interface.encodeFunctionData("transfer", [to, value]);
-        return { to: this.address, data, ...(overrides || {}) };
+        const safeOverrides = {};
+        for (const k of ["value", "gasLimit", "gasPrice", "maxFeePerGas", "maxPriorityFeePerGas", "nonce", "chainId", "remarks", "signingContext"]) { if (overrides && overrides[k] !== undefined) safeOverrides[k] = overrides[k]; }
+        return { ...safeOverrides, to: this.address, data };
       },
       transferFrom: async (from, to, value, overrides) => {
         const data = this.interface.encodeFunctionData("transferFrom", [from, to, value]);
-        return { to: this.address, data, ...(overrides || {}) };
+        const safeOverrides = {};
+        for (const k of ["value", "gasLimit", "gasPrice", "maxFeePerGas", "maxPriorityFeePerGas", "nonce", "chainId", "remarks", "signingContext"]) { if (overrides && overrides[k] !== undefined) safeOverrides[k] = overrides[k]; }
+        return { ...safeOverrides, to: this.address, data };
       },
     };
   }
