@@ -55,17 +55,21 @@ describe("all contracts", () => {
       const provider = getProvider(rpcUrl, chainId);
       const wallet = Wallet.fromEncryptedJsonSync(TEST_WALLET_ENCRYPTED_JSON, TEST_WALLET_PASSPHRASE, provider);
 
-      let deployGasLimit = 600000;
-      try {
-        const firstFactory = new IERC20__factory(wallet);
-        const sampleReq = firstFactory.getDeployTransaction();
-        const est = await provider.estimateGas({ from: wallet.address, data: sampleReq.data });
-        deployGasLimit = Number(est + 200_000n);
-      } catch {
-        deployGasLimit = 6_000_000;
-      }
+      // Estimate the deploy gas per contract: bytecode sizes differ by orders of
+      // magnitude (IERC20 is an empty interface; factory/pair are ~10KB), so a
+      // single shared limit under-provisions the big contracts and their deploy
+      // txs get mined as out-of-gas failures with no code at the address.
+      const deployGas = async (factory, args = []) => {
+        try {
+          const req = factory.getDeployTransaction(...args);
+          const est = await provider.estimateGas({ from: wallet.address, data: req.data });
+          return Number(est + 200_000n);
+        } catch {
+          return 6_000_000;
+        }
+      };
 
-      let IERC20Inst = await (new IERC20__factory(wallet)).deploy({ gasLimit: deployGasLimit });
+      let IERC20Inst = await (new IERC20__factory(wallet)).deploy({ gasLimit: await deployGas(new IERC20__factory(wallet)) });
       const _deployTxIERC20 = IERC20Inst.deployTransaction();
       assert.ok(_deployTxIERC20 && _deployTxIERC20.hash);
       step("IERC20 deploy", String(IERC20Inst.target), _deployTxIERC20.hash);
@@ -80,7 +84,7 @@ describe("all contracts", () => {
         await approveTx1.wait(1, 600_000);
       }
 
-      let QuantumSwapV2ERC20Inst = await (new QuantumSwapV2ERC20__factory(wallet)).deploy({ gasLimit: deployGasLimit });
+      let QuantumSwapV2ERC20Inst = await (new QuantumSwapV2ERC20__factory(wallet)).deploy({ gasLimit: await deployGas(new QuantumSwapV2ERC20__factory(wallet)) });
       const _deployTxQuantumSwapV2ERC20 = QuantumSwapV2ERC20Inst.deployTransaction();
       assert.ok(_deployTxQuantumSwapV2ERC20 && _deployTxQuantumSwapV2ERC20.hash);
       step("QuantumSwapV2ERC20 deploy", String(QuantumSwapV2ERC20Inst.target), _deployTxQuantumSwapV2ERC20.hash);
@@ -90,7 +94,7 @@ describe("all contracts", () => {
       try { void (await QuantumSwapV2ERC20Inst.decimals()); } catch { /* base contract may not return data for decimals() when deployed standalone */ }
       await approveTx2.wait(1, 600_000);
 
-      let QuantumSwapV2FactoryInst = await (new QuantumSwapV2Factory__factory(wallet)).deploy(wallet.address, { gasLimit: deployGasLimit });
+      let QuantumSwapV2FactoryInst = await (new QuantumSwapV2Factory__factory(wallet)).deploy(wallet.address, { gasLimit: await deployGas(new QuantumSwapV2Factory__factory(wallet), [wallet.address]) });
       const _deployTxQuantumSwapV2Factory = QuantumSwapV2FactoryInst.deployTransaction();
       assert.ok(_deployTxQuantumSwapV2Factory && _deployTxQuantumSwapV2Factory.hash);
       step("QuantumSwapV2Factory deploy", String(QuantumSwapV2FactoryInst.target), _deployTxQuantumSwapV2Factory.hash);
@@ -113,7 +117,7 @@ describe("all contracts", () => {
       step("QuantumSwapV2Factory createPair", null, createPairTx.hash);
       await createPairTx.wait(1, 600_000);
 
-      let QuantumSwapV2PairInst = await (new QuantumSwapV2Pair__factory(wallet)).deploy({ gasLimit: deployGasLimit });
+      let QuantumSwapV2PairInst = await (new QuantumSwapV2Pair__factory(wallet)).deploy({ gasLimit: await deployGas(new QuantumSwapV2Pair__factory(wallet)) });
       const _deployTxQuantumSwapV2Pair = QuantumSwapV2PairInst.deployTransaction();
       assert.ok(_deployTxQuantumSwapV2Pair && _deployTxQuantumSwapV2Pair.hash);
       step("QuantumSwapV2Pair deploy", String(QuantumSwapV2PairInst.target), _deployTxQuantumSwapV2Pair.hash);
@@ -123,7 +127,7 @@ describe("all contracts", () => {
       step("QuantumSwapV2Pair approve", null, approveTx3.hash);
       await approveTx3.wait(1, 600_000);
 
-      let QuantumSwapV2Router02Inst = await (new QuantumSwapV2Router02__factory(wallet)).deploy(wallet.address, wallet.address, { gasLimit: deployGasLimit });
+      let QuantumSwapV2Router02Inst = await (new QuantumSwapV2Router02__factory(wallet)).deploy(wallet.address, wallet.address, { gasLimit: await deployGas(new QuantumSwapV2Router02__factory(wallet), [wallet.address, wallet.address]) });
       const _deployTxQuantumSwapV2Router02 = QuantumSwapV2Router02Inst.deployTransaction();
       assert.ok(_deployTxQuantumSwapV2Router02 && _deployTxQuantumSwapV2Router02.hash);
       step("QuantumSwapV2Router02 deploy", String(QuantumSwapV2Router02Inst.target), _deployTxQuantumSwapV2Router02.hash);
@@ -133,7 +137,7 @@ describe("all contracts", () => {
       step("QuantumSwapV2Router02 addLiquidity", null, addLiqTx.hash);
       await addLiqTx.wait(1, 600_000);
 
-      let WQInst = await (new WQ__factory(wallet)).deploy({ gasLimit: deployGasLimit });
+      let WQInst = await (new WQ__factory(wallet)).deploy({ gasLimit: await deployGas(new WQ__factory(wallet)) });
       const _deployTxWQ = WQInst.deployTransaction();
       assert.ok(_deployTxWQ && _deployTxWQ.hash);
       step("WQ deploy", String(WQInst.target), _deployTxWQ.hash);

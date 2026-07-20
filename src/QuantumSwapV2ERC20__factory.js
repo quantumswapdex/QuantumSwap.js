@@ -17,7 +17,9 @@ class QuantumSwapV2ERC20__factory extends ContractFactory {
     try { nonce = await provider.getTransactionCount(from, "pending"); } catch { nonce = await provider.getTransactionCount(from, "latest"); }
     const address = getCreateAddress({ from, nonce });
     const txReq = this.getDeployTransaction();
-    const tx = await signer.sendTransaction({ ...txReq, ...(overrides || {}), nonce });
+    const safeOverrides = {};
+    for (const k of ["value", "gasLimit", "gasPrice", "maxFeePerGas", "maxPriorityFeePerGas", "remarks", "signingContext"]) { if (overrides && overrides[k] !== undefined) safeOverrides[k] = overrides[k]; }
+    const tx = await signer.sendTransaction({ ...txReq, ...safeOverrides, nonce });
     return new QuantumSwapV2ERC20(address, signer, tx);
   }
 

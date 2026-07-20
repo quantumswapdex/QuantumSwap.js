@@ -20,6 +20,8 @@ QuantumSwap.js depends on `quantumcoin` and uses it for `Initialize`, `JsonRpcPr
 - Transactional tests in [test/e2e/](https://github.com/quantumswapdex/QuantumSwap.js/tree/main/test/e2e)
 - Example scripts in [examples/](https://github.com/quantumswapdex/QuantumSwap.js/tree/main/examples)
 
+Since v1.0.3 the wrappers embed the current QuantumSwap-named, optimized contract bytecode (the "Beta 2" build), so fresh deploys through the SDK produce the up-to-date contracts. The ABIs are unchanged and remain fully call-compatible with the Beta 1 (Dec 2025) mainnet addresses listed below.
+
 ## Install
 
 - `npm install`
@@ -43,14 +45,14 @@ Transactional tests require:
 
       cd examples
       npm install
-      $env:QC_RPC_URL="https://public.rpc.quantumcoiapi.com:8545" (export for Linux)
+      $env:QC_RPC_URL="https://public.rpc.quantumcoinapi.com:8545" (export for Linux)
       node run-dex-flow-custom.js
 
 ### Step by step walkthrough
 
-This walkthrough uses **pre-deployed** WQ, V2 Factory, and Swap Router. Do **not** deploy these contracts; use the Test Release (Dec 2025) addresses below.
+This walkthrough uses **pre-deployed** WQ, V2 Factory, and Swap Router. Do **not** deploy these contracts; use the Beta 1 (Dec 2025) addresses below.
 
-**Test Release (Dec 2025) Contracts**
+**Beta 1 (Dec 2025) Contracts**
 
 | Variable | Address |
 |----------|---------|
@@ -92,7 +94,7 @@ QC_RPC_URL=http://your-rpc:8545 node examples/run-dex-flow-custom.js
 QC_RPC_URL=http://your-rpc:8545 npx ts-node examples/run-dex-flow-custom.ts
 ```
 
-The same flow is covered as an E2E test in [test/e2e/dex-full-flow.e2e.test.js](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/test/e2e/dex-full-flow.e2e.test.js) (the test can optionally deploy WQ/Factory/Router when not using Test Release addresses).
+The same flow is covered as an E2E test in [test/e2e/dex-full-flow.e2e.test.js](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/test/e2e/dex-full-flow.e2e.test.js) (the test can optionally deploy WQ/Factory/Router when not using the Beta 1 addresses).
 
 Examples are generated per contract (e.g. [examples/deploy-&lt;Contract&gt;.js](https://github.com/quantumswapdex/QuantumSwap.js/tree/main/examples)).
 
@@ -107,7 +109,7 @@ Examples are generated per contract (e.g. [examples/deploy-&lt;Contract&gt;.js](
 
 ## IERC20
 - **Exports**: `IERC20`, `IERC20__factory`
-- **Constructor**: `constructor()`
+- **Constructor**: (none — interface, no deployable bytecode)
 ### Files
 - [`src/IERC20.js`](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/src/IERC20.js)
 - [`src/IERC20__factory.js`](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/src/IERC20__factory.js)
@@ -135,7 +137,7 @@ Examples are generated per contract (e.g. [examples/deploy-&lt;Contract&gt;.js](
 - (none)
 ## QuantumSwapV2ERC20
 - **Exports**: `QuantumSwapV2ERC20`, `QuantumSwapV2ERC20__factory`
-- **Constructor**: `constructor()`
+- **Constructor**: (none — default constructor)
 ### Files
 - [`src/QuantumSwapV2ERC20.js`](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/src/QuantumSwapV2ERC20.js)
 - [`src/QuantumSwapV2ERC20__factory.js`](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/src/QuantumSwapV2ERC20__factory.js)
@@ -275,7 +277,7 @@ Examples are generated per contract (e.g. [examples/deploy-&lt;Contract&gt;.js](
 - (none)
 ## WQ
 - **Exports**: `WQ`, `WQ__factory`
-- **Constructor**: `constructor()`
+- **Constructor**: (none — default constructor)
 ### Files
 - [`src/WQ.js`](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/src/WQ.js)
 - [`src/WQ__factory.js`](https://github.com/quantumswapdex/QuantumSwap.js/blob/main/src/WQ__factory.js)

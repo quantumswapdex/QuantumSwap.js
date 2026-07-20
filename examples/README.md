@@ -40,7 +40,7 @@ To use the published npm package instead of the local repo, in `examples/package
 to:
 
 ```json
-"quantumswap": "^0.0.1"
+"quantumswap": "^1.0.3"
 ```
 
 Then run `npm install` in `examples/`.
